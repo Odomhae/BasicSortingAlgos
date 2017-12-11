@@ -1,0 +1,151 @@
+#include "sort.h"
+
+
+void quickSort(int list[], const int left, const int right)
+{
+	int q;
+	if (left < right)
+	{
+		q = partition(list, left, right);
+		quickSort(list, left, q - 1);
+		quickSort(list, q + 1, right);
+	}
+}
+int partition(int list[], const int left, const int right)
+{
+	int pivot, tmp;
+	int low, high;
+
+	low = left-1;
+	high = right;
+	pivot = list[right];
+	do
+	{
+		do
+			low++;
+		while (low <= right && list[low] < pivot);
+		do
+			high--;
+		while (high >= left && list[high]>pivot);
+
+		if (low < high)
+			SWAP(list[low], list[high], tmp);
+	} while (low < high);
+
+	SWAP(list[right], list[low], tmp);
+
+	return low;
+}
+int setData(unsigned int list[], const int listSize)
+{
+	unsigned int SEED;
+	FILE *fp;
+	int i;
+
+	if (listSize > MAX_SIZE)
+		return 0;
+
+	fopen_s(&fp, "seed.txt", "r");
+	if (fp == NULL)
+	{
+		printf("*프로그램 최초실행, 시드값 입력 : ");
+		scanf_s("%d", &SEED/*, sizeof(unsigned int)*/);
+	}
+	else
+	{
+		fscanf_s(fp, "%u", &SEED);
+		fclose(fp);
+	}
+	for (i = 0; i < listSize; i++)
+		list[i] = rand() | rand() << 16;
+
+	fopen_s(&fp, "seed.txt", "w");
+	fprintf(fp, "%u", list[i - 1]);
+	fclose(fp);
+
+	return 1;
+}
+void insertionSort(int list[], const int listSize)
+{
+	int i, j, key;
+	for (i = 1; i < listSize; i++)
+	{
+		key = list[i];
+		for (j = i-1; j >= 0 && list[j] > key; j--)
+			list[j + 1] = list[j];
+			list[j+1] = key;
+	}
+}
+void selectionSort(int list[], const int listSize)
+{
+	int i, j, least, tmp;
+	for (i = 0; i < listSize-1; i++)
+	{
+		least = i;
+		for (j = i + 1; j < listSize; j++)
+			if (least > list[j]) least = j;
+				SWAP(list[least], list[i], tmp);
+	}
+}
+void bubblleSort(int list[], const int listSize)
+{
+	int i,j, tmp;
+	for(j = listSize-1; j>0; j--)
+		for (i = 0; i < j; i++)
+			if (list[i] > list[i + 1])
+				SWAP(list[i], list[i + 1], tmp);
+}
+void incInsertionSort(int list[], const int first, const int last, const int gap)
+{	
+	int i, j, key;
+	for (i = first + gap; i <= last; i += gap)
+	{
+		key = list[i];
+		for (j = i - gap; j >= first && list[j]>key; j -= gap)  //삽입정렬 컨셉
+			list[j + gap] = list[j];
+		list[j + gap] = key;
+	}
+}
+void shellSort(int list[], const int n)
+{
+	int i, gap;
+	for (gap = n / 2; gap>0; gap /= 2)
+	{
+		if ((gap % 2) == 0) gap++;
+		for (i = 0; i<gap; i++)
+			incInsertionSort(list, i, n - 1, gap);
+	}
+}
+
+int sorted[MAX_SIZE];  ////
+static void merge(int list[], const int left, const int mid, const int right)
+{
+	int i, j, k, l;
+	i = left; j = mid + 1; k = left;
+	
+	while (i <= mid && j <= right)
+	{
+		if (list[i] <= list[j]) sorted[k++] = list[i++];
+		else sorted[k++] = list[j++];
+	}
+	if (i>mid) 
+		for (l = j; l <= right; l++)
+			sorted[k++] = list[l];
+	else 
+		for (l = i; l <= mid; l++)
+			sorted[k++] = list[l];
+
+	for (l = left; l <= right; l++)
+		list[l] = sorted[l];
+}
+void mergeSort(int list[], const int left, const int right)
+{
+	int mid;
+	if (left < right)
+	{
+		mid = (left + right) / 2; // 리스트의균등분할
+		mergeSort(list, left, mid); // 부분리스트정렬
+		mergeSort(list, mid + 1, right);//부분리스트정렬
+		merge(list, left, mid, right); // 합병
+	}
+}
